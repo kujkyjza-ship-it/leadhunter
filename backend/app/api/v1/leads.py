@@ -6,6 +6,7 @@ from uuid import UUID
 from app.database import get_db
 from app.models.lead import Lead
 from app.schemas.lead import LeadCreate, LeadResponse, LeadUpdate
+from app.services.ai_generator import generate_cold_email
 
 router = APIRouter()
 
@@ -55,6 +56,26 @@ def update_lead(lead_id: UUID, lead_update: LeadUpdate, db: Session = Depends(ge
     db.commit()
     db.refresh(lead)
     return lead
+    
+@router.post("/{lead_id}/generate-message")
+def generate_message(lead_id: UUID, db: Session = Depends(get_db)):
+    """Generuj AI zprávu pro lead"""
+    lead = db.query(Lead).filter(Lead.id == lead_id).first()
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    
+    lead_data = {
+        "full_name": lead.full_name,
+        "company_name": lead.company_name,
+        "job_title": lead.job_title,
+    }
+    
+    result = generate_cold_email(lead_data)
+    
+    if result["status"] == "error":
+        raise HTTPException(status_code=500, detail=result.get("error", "AI generation failed"))
+    
+    return result
 
 @router.delete("/{lead_id}")
 def delete_lead(lead_id: UUID, db: Session = Depends(get_db)):

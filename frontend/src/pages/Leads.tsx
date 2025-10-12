@@ -24,6 +24,10 @@ export default function Leads() {
     job_title: '',
     notes: '',
   });
+  const [generatingFor, setGeneratingFor] = useState<string | null>(null);
+  const [generatedMessages, setGeneratedMessages] = useState<{[key: string]: any}>({});
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [currentMessage, setCurrentMessage] = useState<any>(null);
 
   useEffect(() => {
     fetchLeads();
@@ -68,6 +72,27 @@ export default function Leads() {
     } catch (error) {
       alert('Chyba při mazání leadu');
     }
+  };
+
+  const handleGenerateMessage = async (leadId: string) => {
+    setGeneratingFor(leadId);
+    try {
+      const response = await axios.post(
+        `http://localhost:8000/api/v1/leads/${leadId}/generate-message`
+      );
+      setGeneratedMessages({ ...generatedMessages, [leadId]: response.data });
+      setCurrentMessage(response.data);
+      setShowMessageModal(true);
+    } catch (error: any) {
+      alert('Chyba při generování: ' + (error.response?.data?.detail || 'Neznámá chyba'));
+    } finally {
+      setGeneratingFor(null);
+    }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    alert('Zkopírováno do schránky!');
   };
 
   const handleLogout = () => {
@@ -282,7 +307,14 @@ export default function Leads() {
                           {lead.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                        <button
+                          onClick={() => handleGenerateMessage(lead.id)}
+                          disabled={generatingFor === lead.id}
+                          className="text-blue-600 hover:text-blue-900 disabled:text-gray-400"
+                        >
+                          {generatingFor === lead.id ? '⏳ Generuji...' : '🤖 Generuj zprávu'}
+                        </button>
                         <button
                           onClick={() => handleDelete(lead.id)}
                           className="text-red-600 hover:text-red-900"
@@ -304,6 +336,73 @@ export default function Leads() {
           </p>
         </div>
       </main>
+
+      {showMessageModal && currentMessage && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-2xl font-bold text-gray-800">
+                  🤖 AI Vygenerovaná Zpráva
+                </h3>
+                <button
+                  onClick={() => setShowMessageModal(false)}
+                  className="text-gray-500 hover:text-gray-700 text-2xl"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    📧 Předmět:
+                  </label>
+                  <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                    <p className="text-gray-800">{currentMessage.subject}</p>
+                  </div>
+                  <button
+                    onClick={() => copyToClipboard(currentMessage.subject)}
+                    className="mt-2 text-sm text-blue-600 hover:text-blue-800"
+                  >
+                    📋 Kopírovat předmět
+                  </button>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    ✉️ Tělo emailu:
+                  </label>
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <p className="text-gray-800 whitespace-pre-wrap">{currentMessage.body}</p>
+                  </div>
+                  <button
+                    onClick={() => copyToClipboard(currentMessage.body)}
+                    className="mt-2 text-sm text-blue-600 hover:text-blue-800"
+                  >
+                    📋 Kopírovat tělo
+                  </button>
+                </div>
+
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => copyToClipboard(`${currentMessage.subject}\n\n${currentMessage.body}`)}
+                    className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-semibold"
+                  >
+                    📋 Kopírovat vše
+                  </button>
+                  <button
+                    onClick={() => setShowMessageModal(false)}
+                    className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg hover:bg-gray-300 font-semibold"
+                  >
+                    Zavřít
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
