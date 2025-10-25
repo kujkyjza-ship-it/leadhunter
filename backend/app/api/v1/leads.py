@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from typing import List
 from uuid import UUID
 from slowapi import Limiter
 from slowapi.util import get_remote_address
+import csv
+import io
 
 from app.database import get_db
 from app.models.lead import Lead
@@ -146,3 +149,114 @@ def delete_lead(
     db.delete(lead)
     db.commit()
     return {"message": "Lead deleted successfully"}
+
+@router.get("/export/csv")
+def export_leads_csv(
+    status: str = None,
+    search: str = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Exportovat leady do CSV"""
+    query = db.query(Lead).filter(Lead.user_id == current_user.id)
+
+    # Aplikovat stejné filtry jako v get_leads
+    if status:
+        query = query.filter(Lead.status == status)
+    if search:
+        search_pattern = f"%{search}%"
+        query = query.filter(
+            (Lead.full_name.ilike(search_pattern)) |
+            (Lead.email.ilike(search_pattern)) |
+            (Lead.company_name.ilike(search_pattern))
+        )
+
+    leads = query.all()
+
+    # Vytvořit CSV v paměti
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    # Header
+    writer.writerow([
+        'ID', 'Celé jméno', 'Email', 'Telefon', 'Firma',
+        'Web firmy', 'Pracovní pozice', 'Status',
+        'Zdroj', 'AI skóre', 'Poznámky', 'Vytvořeno'
+    ])
+
+    # Data
+    for lead in leads:
+        writer.writerow([
+            str(lead.id),
+            lead.full_name,
+            lead.email,
+            lead.phone or '',
+            lead.company_name or '',
+            lead.company_website or '',
+            lead.job_title or '',
+            lead.status,
+            lead.source,
+            lead.ai_score or '',
+            lead.notes or '',
+            lead.created_at.strftime('%Y-%m-%d %H:%M:%S')
+        ])
+
+    # Připravit response
+    output.seek(0)
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": "attachment; filename=leads.csv"
+        }
+    )
+
+@router.post("/bulk-delete")
+def bulk_delete_leads(
+    lead_ids: List[UUID],
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Hromadně smazat leady"""
+    if not lead_ids:
+        raise HTTPException(status_code=400, detail="No lead IDs provided")
+
+    deleted_count = db.query(Lead).filter(
+        Lead.id.in_(lead_ids),
+        Lead.user_id == current_user.id
+    ).delete(synchronize_session=False)
+
+    db.commit()
+
+    return {
+        "message": f"Successfully deleted {deleted_count} leads",
+        "deleted_count": deleted_count
+    }
+
+@router.post("/bulk-update-status")
+def bulk_update_status(
+    lead_ids: List[UUID],
+    new_status: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Hromadně změnit status leadů"""
+    if not lead_ids:
+        raise HTTPException(status_code=400, detail="No lead IDs provided")
+
+    # Validace statusu
+    allowed_statuses = ['new', 'contacted', 'qualified', 'proposal', 'negotiation', 'closed_won', 'closed_lost']
+    if new_status not in allowed_statuses:
+        raise HTTPException(status_code=400, detail=f"Invalid status. Allowed: {', '.join(allowed_statuses)}")
+
+    updated_count = db.query(Lead).filter(
+        Lead.id.in_(lead_ids),
+        Lead.user_id == current_user.id
+    ).update({"status": new_status}, synchronize_session=False)
+
+    db.commit()
+
+    return {
+        "message": f"Successfully updated {updated_count} leads to status '{new_status}'",
+        "updated_count": updated_count
+    }

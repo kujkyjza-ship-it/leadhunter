@@ -32,6 +32,7 @@ export default function Leads() {
   const [statusFilter, setStatusFilter] = useState('');
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState('desc');
+  const [selectedLeads, setSelectedLeads] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchLeads();
@@ -47,10 +48,101 @@ export default function Leads() {
 
       const response = await api.get(`/leads?${params.toString()}`);
       setLeads(response.data);
+      setSelectedLeads(new Set()); // Vyčistit výběr při refresh
     } catch (error) {
       console.error('Chyba při načítání leadů:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    const statusConfig: {[key: string]: {label: string, color: string}} = {
+      'new': { label: 'Nový', color: 'bg-blue-100 text-blue-800' },
+      'contacted': { label: 'Kontaktován', color: 'bg-yellow-100 text-yellow-800' },
+      'qualified': { label: 'Kvalifikován', color: 'bg-purple-100 text-purple-800' },
+      'proposal': { label: 'Nabídka', color: 'bg-indigo-100 text-indigo-800' },
+      'negotiation': { label: 'Vyjednávání', color: 'bg-orange-100 text-orange-800' },
+      'closed_won': { label: 'Uzavřeno - Vyhráno', color: 'bg-green-100 text-green-800' },
+      'closed_lost': { label: 'Uzavřeno - Prohráno', color: 'bg-red-100 text-red-800' }
+    };
+
+    const config = statusConfig[status] || { label: status, color: 'bg-gray-100 text-gray-800' };
+    return { label: config.label, color: config.color };
+  };
+
+  const toggleLeadSelection = (leadId: string) => {
+    const newSelection = new Set(selectedLeads);
+    if (newSelection.has(leadId)) {
+      newSelection.delete(leadId);
+    } else {
+      newSelection.add(leadId);
+    }
+    setSelectedLeads(newSelection);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedLeads.size === leads.length) {
+      setSelectedLeads(new Set());
+    } else {
+      setSelectedLeads(new Set(leads.map(l => l.id)));
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedLeads.size === 0) return;
+    if (!confirm(`Opravdu smazat ${selectedLeads.size} leadů?`)) return;
+
+    try {
+      await api.post('/leads/bulk-delete', Array.from(selectedLeads));
+      fetchLeads();
+    } catch (error: any) {
+      alert('Chyba při mazání: ' + (error.response?.data?.detail || 'Neznámá chyba'));
+    }
+  };
+
+  const handleBulkStatusUpdate = async (newStatus: string) => {
+    if (selectedLeads.size === 0) return;
+
+    try {
+      await api.post('/leads/bulk-update-status', {
+        lead_ids: Array.from(selectedLeads),
+        new_status: newStatus
+      });
+      fetchLeads();
+    } catch (error: any) {
+      alert('Chyba při změně statusu: ' + (error.response?.data?.detail || 'Neznámá chyba'));
+    }
+  };
+
+  const handleStatusChange = async (leadId: string, newStatus: string) => {
+    try {
+      await api.put(`/leads/${leadId}`, { status: newStatus });
+      fetchLeads();
+    } catch (error: any) {
+      alert('Chyba při změně statusu: ' + (error.response?.data?.detail || 'Neznámá chyba'));
+    }
+  };
+
+  const handleExportCSV = async () => {
+    try {
+      const params = new URLSearchParams();
+      if (searchTerm) params.append('search', searchTerm);
+      if (statusFilter) params.append('status', statusFilter);
+
+      const response = await api.get(`/leads/export/csv?${params.toString()}`, {
+        responseType: 'blob'
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `leads_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      alert('Chyba při exportu CSV');
     }
   };
 
@@ -145,13 +237,60 @@ export default function Leads() {
           <h2 className="text-3xl font-bold text-gray-800">
             📊 Vaše Leady
           </h2>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition-colors"
-          >
-            {showForm ? '✕ Zrušit' : '+ Přidat Lead'}
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={handleExportCSV}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition-colors"
+            >
+              📥 Export CSV
+            </button>
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition-colors"
+            >
+              {showForm ? '✕ Zrušit' : '+ Přidat Lead'}
+            </button>
+          </div>
         </div>
+
+        {selectedLeads.size > 0 && (
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-4">
+                <span className="font-semibold text-blue-800">
+                  Vybráno: {selectedLeads.size} leadů
+                </span>
+                <button
+                  onClick={handleBulkDelete}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold transition-colors"
+                >
+                  Smazat vybrané
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-blue-700">Změnit status na:</span>
+                <select
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      handleBulkStatusUpdate(e.target.value);
+                      e.target.value = '';
+                    }
+                  }}
+                  className="px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                >
+                  <option value="">-- Vyberte status --</option>
+                  <option value="new">Nový</option>
+                  <option value="contacted">Kontaktován</option>
+                  <option value="qualified">Kvalifikován</option>
+                  <option value="proposal">Nabídka</option>
+                  <option value="negotiation">Vyjednávání</option>
+                  <option value="closed_won">Uzavřeno - Vyhráno</option>
+                  <option value="closed_lost">Uzavřeno - Prohráno</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="bg-white rounded-xl shadow-md p-4 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -319,6 +458,14 @@ export default function Leads() {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
+                    <th className="px-6 py-3 text-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedLeads.size === leads.length && leads.length > 0}
+                        onChange={toggleSelectAll}
+                        className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                      />
+                    </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Jméno
                     </th>
@@ -343,8 +490,18 @@ export default function Leads() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {leads.map((lead) => (
+                  {leads.map((lead) => {
+                    const statusBadge = getStatusBadge(lead.status);
+                    return (
                     <tr key={lead.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedLeads.has(lead.id)}
+                          onChange={() => toggleLeadSelection(lead.id)}
+                          className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                        />
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
                           {lead.full_name}
@@ -369,9 +526,19 @@ export default function Leads() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                          {lead.status}
-                        </span>
+                        <select
+                          value={lead.status}
+                          onChange={(e) => handleStatusChange(lead.id, e.target.value)}
+                          className={`px-2 py-1 text-xs font-semibold rounded-full border-0 outline-none cursor-pointer ${statusBadge.color}`}
+                        >
+                          <option value="new">Nový</option>
+                          <option value="contacted">Kontaktován</option>
+                          <option value="qualified">Kvalifikován</option>
+                          <option value="proposal">Nabídka</option>
+                          <option value="negotiation">Vyjednávání</option>
+                          <option value="closed_won">Uzavřeno - Vyhráno</option>
+                          <option value="closed_lost">Uzavřeno - Prohráno</option>
+                        </select>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                         <button
@@ -389,7 +556,8 @@ export default function Leads() {
                         </button>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
