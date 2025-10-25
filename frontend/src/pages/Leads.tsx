@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 
 interface Lead {
   id: string;
@@ -28,14 +28,24 @@ export default function Leads() {
   const [generatedMessages, setGeneratedMessages] = useState<{[key: string]: any}>({});
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [currentMessage, setCurrentMessage] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [sortBy, setSortBy] = useState('created_at');
+  const [sortOrder, setSortOrder] = useState('desc');
 
   useEffect(() => {
     fetchLeads();
-  }, []);
+  }, [searchTerm, statusFilter, sortBy, sortOrder]);
 
   const fetchLeads = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/v1/leads');
+      const params = new URLSearchParams();
+      if (searchTerm) params.append('search', searchTerm);
+      if (statusFilter) params.append('status', statusFilter);
+      params.append('sort_by', sortBy);
+      params.append('sort_order', sortOrder);
+
+      const response = await api.get(`/leads?${params.toString()}`);
       setLeads(response.data);
     } catch (error) {
       console.error('Chyba při načítání leadů:', error);
@@ -47,7 +57,7 @@ export default function Leads() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:8000/api/v1/leads', formData);
+      await api.post('/leads', formData);
       setFormData({
         full_name: '',
         email: '',
@@ -65,9 +75,9 @@ export default function Leads() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Opravdu smazat tento lead?')) return;
-    
+
     try {
-      await axios.delete(`http://localhost:8000/api/v1/leads/${id}`);
+      await api.delete(`/leads/${id}`);
       fetchLeads();
     } catch (error) {
       alert('Chyba při mazání leadu');
@@ -77,9 +87,7 @@ export default function Leads() {
   const handleGenerateMessage = async (leadId: string) => {
     setGeneratingFor(leadId);
     try {
-      const response = await axios.post(
-        `http://localhost:8000/api/v1/leads/${leadId}/generate-message`
-      );
+      const response = await api.post(`/leads/${leadId}/generate-message`);
       setGeneratedMessages({ ...generatedMessages, [leadId]: response.data });
       setCurrentMessage(response.data);
       setShowMessageModal(true);
@@ -143,6 +151,64 @@ export default function Leads() {
           >
             {showForm ? '✕ Zrušit' : '+ Přidat Lead'}
           </button>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-md p-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Vyhledávání
+              </label>
+              <input
+                type="text"
+                placeholder="Hledat podle jména, emailu nebo firmy..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Status
+              </label>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              >
+                <option value="">Všechny statusy</option>
+                <option value="new">Nový</option>
+                <option value="contacted">Kontaktován</option>
+                <option value="qualified">Kvalifikován</option>
+                <option value="proposal">Nabídka</option>
+                <option value="negotiation">Vyjednávání</option>
+                <option value="closed_won">Uzavřeno - Vyhráno</option>
+                <option value="closed_lost">Uzavřeno - Prohráno</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Řazení
+              </label>
+              <select
+                value={`${sortBy}-${sortOrder}`}
+                onChange={(e) => {
+                  const [field, order] = e.target.value.split('-');
+                  setSortBy(field);
+                  setSortOrder(order);
+                }}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              >
+                <option value="created_at-desc">Nejnovější</option>
+                <option value="created_at-asc">Nejstarší</option>
+                <option value="full_name-asc">Jméno (A-Z)</option>
+                <option value="full_name-desc">Jméno (Z-A)</option>
+                <option value="company_name-asc">Firma (A-Z)</option>
+                <option value="company_name-desc">Firma (Z-A)</option>
+                <option value="status-asc">Status (A-Z)</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         {showForm && (
