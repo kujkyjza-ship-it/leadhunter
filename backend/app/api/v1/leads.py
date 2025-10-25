@@ -13,6 +13,7 @@ from app.models.lead import Lead
 from app.models.user import User
 from app.schemas.lead import LeadCreate, LeadResponse, LeadUpdate
 from app.services.ai_generator import generate_cold_email
+from app.services.lead_scorer import calculate_lead_score
 from app.api.v1.auth import get_current_user
 
 limiter = Limiter(key_func=get_remote_address)
@@ -259,4 +260,83 @@ def bulk_update_status(
     return {
         "message": f"Successfully updated {updated_count} leads to status '{new_status}'",
         "updated_count": updated_count
+    }
+
+@router.post("/{lead_id}/calculate-score")
+@limiter.limit("20/minute")
+def calculate_lead_score_endpoint(
+    request: Request,
+    lead_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Vypočítat AI skóre kvality pro konkrétní lead"""
+    lead = db.query(Lead).filter(Lead.id == lead_id, Lead.user_id == current_user.id).first()
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+
+    lead_data = {
+        "full_name": lead.full_name,
+        "email": lead.email,
+        "phone": lead.phone,
+        "company_name": lead.company_name,
+        "job_title": lead.job_title,
+        "notes": lead.notes
+    }
+
+    result = calculate_lead_score(lead_data)
+
+    if result["status"] == "success":
+        # Uložit score do databáze
+        lead.ai_score = result["score"]
+        db.commit()
+        db.refresh(lead)
+
+        return {
+            "lead_id": str(lead.id),
+            "score": result["score"],
+            "reasoning": result.get("reasoning", ""),
+            "status": "success"
+        }
+    else:
+        raise HTTPException(status_code=500, detail="Failed to calculate score")
+
+@router.post("/recalculate-all-scores")
+@limiter.limit("3/hour")
+def recalculate_all_scores(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Přepočítat AI skóre pro všechny leady uživatele (max 3x za hodinu)"""
+    leads = db.query(Lead).filter(Lead.user_id == current_user.id).all()
+
+    updated_count = 0
+    failed_count = 0
+
+    for lead in leads:
+        lead_data = {
+            "full_name": lead.full_name,
+            "email": lead.email,
+            "phone": lead.phone,
+            "company_name": lead.company_name,
+            "job_title": lead.job_title,
+            "notes": lead.notes
+        }
+
+        result = calculate_lead_score(lead_data)
+
+        if result["status"] == "success":
+            lead.ai_score = result["score"]
+            updated_count += 1
+        else:
+            failed_count += 1
+
+    db.commit()
+
+    return {
+        "message": f"Recalculated scores for {updated_count} leads",
+        "updated_count": updated_count,
+        "failed_count": failed_count,
+        "total_leads": len(leads)
     }

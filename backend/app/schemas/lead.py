@@ -60,8 +60,9 @@ class LeadResponse(BaseModel):
     company_name: Optional[str]
     job_title: Optional[str]
     status: str
+    ai_score: Optional[float]
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
 

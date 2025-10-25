@@ -1,18 +1,38 @@
 from openai import OpenAI
 from app.config import settings
+from typing import Optional
 
 client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
-def generate_cold_email(lead_data: dict) -> dict:
+def generate_cold_email(lead_data: dict, custom_template: Optional[str] = None) -> dict:
     """
     Generuje personalizovaný cold email pomocí GPT-4.
+
+    Args:
+        lead_data: Informace o leadu
+        custom_template: Volitelná custom šablona promptu. Můžeš použít placeholdery:
+                        {full_name}, {company_name}, {job_title}, {email}, {phone}
     """
-    
+
     full_name = lead_data.get('full_name', 'Vážený/á')
     company_name = lead_data.get('company_name', 'vaše firma')
     job_title = lead_data.get('job_title', 'vaší pozici')
-    
-    prompt = f"""Vytvoř profesionální cold email v češtině pro B2B oslovení s těmito parametry:
+
+    # Pokud je zadána custom šablona, použij ji
+    if custom_template:
+        try:
+            prompt = custom_template.format(
+                full_name=full_name,
+                company_name=company_name,
+                job_title=job_title,
+                email=lead_data.get('email', ''),
+                phone=lead_data.get('phone', '')
+            )
+        except KeyError as e:
+            prompt = custom_template  # Pokud formátování selže, použij šablonu jak je
+    else:
+        # Defaultní šablona
+        prompt = f"""Vytvoř profesionální cold email v češtině pro B2B oslovení s těmito parametry:
 
 Informace o příjemci:
 - Jméno: {full_name}
@@ -37,20 +57,20 @@ Email by měl znít přirozeně, ne jako automatická zpráva."""
             model="gpt-4o-mini",
             messages=[
                 {
-                    "role": "system", 
+                    "role": "system",
                     "content": "Jsi expert na B2B sales copywriting. Píšeš krátké, efektivní cold emaily v češtině, které nezní jako spam a mají vysokou response rate."
                 },
                 {
-                    "role": "user", 
+                    "role": "user",
                     "content": prompt
                 }
             ],
             temperature=0.7,
             max_tokens=500
         )
-        
+
         email_body = response.choices[0].message.content.strip()
-        
+
         # Generuj také subject line
         subject_prompt = f"""Na základě tohoto emailu vytvoř krátký, poutavý předmět (subject line) v češtině:
 
@@ -73,15 +93,15 @@ Vrať POUZE subject line, nic jiného."""
             temperature=0.8,
             max_tokens=50
         )
-        
+
         subject = subject_response.choices[0].message.content.strip().strip('"')
-        
+
         return {
             "subject": subject,
             "body": email_body,
             "status": "success"
         }
-        
+
     except Exception as e:
         return {
             "subject": "",

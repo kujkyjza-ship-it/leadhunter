@@ -9,6 +9,7 @@ interface Lead {
   company_name?: string;
   job_title?: string;
   status: string;
+  ai_score?: number;
   created_at: string;
 }
 
@@ -125,7 +126,7 @@ export default function Leads() {
   };
 
   const handleExportCSV = async () => {
-    try {
+    try:
       const params = new URLSearchParams();
       if (searchTerm) params.append('search', searchTerm);
       if (statusFilter) params.append('status', statusFilter);
@@ -143,6 +144,36 @@ export default function Leads() {
       link.remove();
     } catch (error) {
       alert('Chyba při exportu CSV');
+    }
+  };
+
+  const getScoreBadge = (score?: number) => {
+    if (!score) return { label: 'N/A', color: 'bg-gray-100 text-gray-600' };
+
+    if (score >= 80) return { label: `${score}`, color: 'bg-green-100 text-green-800' };
+    if (score >= 60) return { label: `${score}`, color: 'bg-blue-100 text-blue-800' };
+    if (score >= 40) return { label: `${score}`, color: 'bg-yellow-100 text-yellow-800' };
+    return { label: `${score}`, color: 'bg-red-100 text-red-800' };
+  };
+
+  const handleCalculateScore = async (leadId: string) => {
+    try {
+      await api.post(`/leads/${leadId}/calculate-score`);
+      fetchLeads();
+    } catch (error: any) {
+      alert('Chyba při výpočtu skóre: ' + (error.response?.data?.detail || 'Neznámá chyba'));
+    }
+  };
+
+  const handleRecalculateAllScores = async () => {
+    if (!confirm('Přepočítat AI skóre pro všechny leady? Může to chvíli trvat.')) return;
+
+    try {
+      const response = await api.post('/leads/recalculate-all-scores');
+      alert(`Úspěšně přepočteno ${response.data.updated_count} leadů`);
+      fetchLeads();
+    } catch (error: any) {
+      alert('Chyba při přepočtu: ' + (error.response?.data?.detail || 'Neznámá chyba'));
     }
   };
 
@@ -238,6 +269,12 @@ export default function Leads() {
             📊 Vaše Leady
           </h2>
           <div className="flex gap-3">
+            <button
+              onClick={handleRecalculateAllScores}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold transition-colors"
+            >
+              🎯 Přepočítat AI skóre
+            </button>
             <button
               onClick={handleExportCSV}
               className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition-colors"
@@ -484,6 +521,9 @@ export default function Leads() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
                     </th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      AI Skóre
+                    </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Akce
                     </th>
@@ -539,6 +579,21 @@ export default function Leads() {
                           <option value="closed_won">Uzavřeno - Vyhráno</option>
                           <option value="closed_lost">Uzavřeno - Prohráno</option>
                         </select>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <div className="flex flex-col items-center gap-1">
+                          <span className={`px-3 py-1 text-xs font-bold rounded-full ${getScoreBadge(lead.ai_score).color}`}>
+                            {getScoreBadge(lead.ai_score).label}
+                          </span>
+                          {!lead.ai_score && (
+                            <button
+                              onClick={() => handleCalculateScore(lead.id)}
+                              className="text-xs text-purple-600 hover:text-purple-800 underline"
+                            >
+                              Vypočítat
+                            </button>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                         <button
