@@ -126,7 +126,7 @@ export default function Leads() {
   };
 
   const handleExportCSV = async () => {
-    try:
+    try {
       const params = new URLSearchParams();
       if (searchTerm) params.append('search', searchTerm);
       if (statusFilter) params.append('status', statusFilter);
