@@ -31,21 +31,21 @@ export default function Layout({ children }: LayoutProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Sidebar */}
       <aside className={`fixed top-0 left-0 z-40 h-screen transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-20'}`}>
-        <div className="h-full px-3 py-4 overflow-y-auto bg-white dark:bg-slate-800 shadow-xl border-r border-slate-200 dark:border-slate-700">
+        <div className="h-full px-3 py-4 overflow-y-auto bg-white dark:bg-slate-800 shadow-sm border-r border-slate-200 dark:border-slate-700">
           {/* Logo */}
           <div className="flex items-center justify-between mb-8 px-3">
             {sidebarOpen && (
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-slate-800 dark:text-white">LeadHunter</h2>
+                  <h2 className="text-base font-bold text-slate-800 dark:text-white">LeadHunter</h2>
                   <p className="text-xs text-slate-500 dark:text-slate-400">AI Platform</p>
                 </div>
               </div>
@@ -61,32 +61,32 @@ export default function Layout({ children }: LayoutProps) {
           </div>
 
           {/* Navigation */}
-          <nav className="space-y-2">
+          <nav className="space-y-1">
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;
               return (
                 <button
                   key={item.path}
                   onClick={() => navigate(item.path)}
-                  className={`w-full flex items-center ${sidebarOpen ? 'px-4' : 'px-3 justify-center'} py-3 rounded-xl transition-all ${
+                  className={`w-full flex items-center ${sidebarOpen ? 'px-4' : 'px-3 justify-center'} py-2.5 rounded-lg transition-all ${
                     isActive
-                      ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg'
+                      ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium'
                       : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                   }`}
                 >
                   {item.icon}
-                  {sidebarOpen && <span className="ml-3 font-medium">{item.name}</span>}
+                  {sidebarOpen && <span className="ml-3 text-sm">{item.name}</span>}
                 </button>
               );
             })}
           </nav>
 
           {/* Bottom section */}
-          <div className="absolute bottom-4 left-3 right-3 space-y-2">
+          <div className="absolute bottom-4 left-3 right-3 space-y-1">
             {/* Theme toggle */}
             <button
               onClick={toggleTheme}
-              className={`w-full flex items-center ${sidebarOpen ? 'px-4' : 'px-3 justify-center'} py-3 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors`}
+              className={`w-full flex items-center ${sidebarOpen ? 'px-4' : 'px-3 justify-center'} py-2.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors`}
             >
               {theme === 'dark' ? (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -97,18 +97,18 @@ export default function Layout({ children }: LayoutProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                 </svg>
               )}
-              {sidebarOpen && <span className="ml-3 font-medium">{theme === 'dark' ? 'Světlý režim' : 'Tmavý režim'}</span>}
+              {sidebarOpen && <span className="ml-3 text-sm">{theme === 'dark' ? 'Světlý režim' : 'Tmavý režim'}</span>}
             </button>
 
             {/* Logout */}
             <button
               onClick={handleLogout}
-              className={`w-full flex items-center ${sidebarOpen ? 'px-4' : 'px-3 justify-center'} py-3 rounded-xl text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors`}
+              className={`w-full flex items-center ${sidebarOpen ? 'px-4' : 'px-3 justify-center'} py-2.5 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors`}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
-              {sidebarOpen && <span className="ml-3 font-medium">Odhlásit se</span>}
+              {sidebarOpen && <span className="ml-3 text-sm">Odhlásit se</span>}
             </button>
           </div>
         </div>
