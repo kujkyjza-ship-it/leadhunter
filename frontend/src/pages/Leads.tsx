@@ -602,12 +602,11 @@ export default function Leads() {
           )}
         </div>
 
-        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-blue-800 text-sm">
+        <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+          <p className="text-blue-800 dark:text-blue-300 text-sm">
             💡 <strong>Tip:</strong> Celkem máte <strong>{leads.length}</strong> leadů v databázi.
           </p>
         </div>
-      </main>
 
       {showMessageModal && currentMessage && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
