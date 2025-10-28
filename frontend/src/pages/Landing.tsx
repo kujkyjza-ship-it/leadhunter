@@ -32,10 +32,10 @@ export default function Landing() {
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex space-x-6">
-              <a href="#services" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition">Služby</a>
-              <a href="#about" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition">O nás</a>
-              <a href="#process" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition">Proces</a>
-              <a href="#contact" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition">Kontakt</a>
+              <a href="#services" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:underline transition cursor-pointer font-medium">Služby</a>
+              <a href="#about" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:underline transition cursor-pointer font-medium">O nás</a>
+              <a href="#process" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:underline transition cursor-pointer font-medium">Proces</a>
+              <a href="#contact" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:underline transition cursor-pointer font-medium">Kontakt</a>
             </nav>
 
             <button
@@ -56,13 +56,13 @@ export default function Landing() {
           {/* Mobile Navigation */}
           {mobileMenuOpen && (
             <nav className="md:hidden mt-4 pb-4 flex flex-col space-y-3">
-              <a href="#services" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition" onClick={() => setMobileMenuOpen(false)}>Služby</a>
-              <a href="#about" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition" onClick={() => setMobileMenuOpen(false)}>O nás</a>
-              <a href="#process" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition" onClick={() => setMobileMenuOpen(false)}>Proces</a>
-              <a href="#contact" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition" onClick={() => setMobileMenuOpen(false)}>Kontakt</a>
+              <a href="#services" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:underline transition cursor-pointer font-medium" onClick={() => setMobileMenuOpen(false)}>Služby</a>
+              <a href="#about" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:underline transition cursor-pointer font-medium" onClick={() => setMobileMenuOpen(false)}>O nás</a>
+              <a href="#process" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:underline transition cursor-pointer font-medium" onClick={() => setMobileMenuOpen(false)}>Proces</a>
+              <a href="#contact" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:underline transition cursor-pointer font-medium" onClick={() => setMobileMenuOpen(false)}>Kontakt</a>
               <button
                 onClick={() => navigate('/login')}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition cursor-pointer"
               >
                 Přihlásit se
               </button>
@@ -82,10 +82,10 @@ export default function Landing() {
             Hledáte zkušený inside sales nebo telemarketing tým pro etablování relevantního podílu na evropském trhu?
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="#contact" className="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition inline-flex items-center justify-center">
+            <a href="#contact" className="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 hover:shadow-lg transition inline-flex items-center justify-center cursor-pointer">
               Začít nyní
             </a>
-            <a href="#services" className="bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 border-2 border-blue-600 dark:border-blue-400 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-50 dark:hover:bg-slate-600 transition">
+            <a href="#services" className="bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 border-2 border-blue-600 dark:border-blue-400 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-50 dark:hover:bg-slate-600 hover:shadow-lg transition cursor-pointer">
               Zjistit více
             </a>
           </div>
@@ -399,7 +399,7 @@ export default function Landing() {
           <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
             Kontaktujte nás ještě dnes a zjistěte, jak můžeme pomoci vašemu businessu růst
           </p>
-          <a href="#contact" className="inline-flex items-center bg-blue-600 text-white px-10 py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition">
+          <a href="#contact" className="inline-flex items-center bg-blue-600 text-white px-10 py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 hover:shadow-lg transition cursor-pointer">
             Domluvit schůzku
           </a>
         </div>
@@ -526,27 +526,27 @@ export default function Landing() {
             <div>
               <h4 className="font-semibold mb-4">Služby</h4>
               <ul className="space-y-2 text-slate-400">
-                <li><a href="#services" className="hover:text-white transition">Telemarketing</a></li>
-                <li><a href="#services" className="hover:text-white transition">Lead Generation</a></li>
-                <li><a href="#services" className="hover:text-white transition">Database</a></li>
-                <li><a href="#services" className="hover:text-white transition">Events</a></li>
+                <li><a href="#services" className="hover:text-white hover:underline transition cursor-pointer">Telemarketing</a></li>
+                <li><a href="#services" className="hover:text-white hover:underline transition cursor-pointer">Lead Generation</a></li>
+                <li><a href="#services" className="hover:text-white hover:underline transition cursor-pointer">Database</a></li>
+                <li><a href="#services" className="hover:text-white hover:underline transition cursor-pointer">Events</a></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Společnost</h4>
               <ul className="space-y-2 text-slate-400">
-                <li><a href="#about" className="hover:text-white transition">O nás</a></li>
-                <li><a href="#" className="hover:text-white transition">Kariéra</a></li>
-                <li><a href="#" className="hover:text-white transition">Blog</a></li>
-                <li><a href="#contact" className="hover:text-white transition">Kontakt</a></li>
+                <li><a href="#about" className="hover:text-white hover:underline transition cursor-pointer">O nás</a></li>
+                <li><a href="#" className="hover:text-white hover:underline transition cursor-pointer">Kariéra</a></li>
+                <li><a href="#" className="hover:text-white hover:underline transition cursor-pointer">Blog</a></li>
+                <li><a href="#contact" className="hover:text-white hover:underline transition cursor-pointer">Kontakt</a></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Legal</h4>
               <ul className="space-y-2 text-slate-400">
-                <li><a href="#" className="hover:text-white transition">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white transition">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-white transition">GDPR</a></li>
+                <li><a href="#" className="hover:text-white hover:underline transition cursor-pointer">Privacy Policy</a></li>
+                <li><a href="#" className="hover:text-white hover:underline transition cursor-pointer">Terms of Service</a></li>
+                <li><a href="#" className="hover:text-white hover:underline transition cursor-pointer">GDPR</a></li>
               </ul>
             </div>
           </div>
