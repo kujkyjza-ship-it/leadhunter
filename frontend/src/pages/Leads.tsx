@@ -460,23 +460,23 @@ export default function Leads() {
           </div>
         )}
 
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg overflow-hidden">
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
           {leads.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg mb-4">
+              <p className="text-slate-500 dark:text-slate-400 text-lg mb-4">
                 Zatím nemáte žádné leady
               </p>
               <button
                 onClick={() => setShowForm(true)}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
               >
                 Přidat první lead
               </button>
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+                <thead className="bg-slate-50 dark:bg-slate-900/50">
                   <tr>
                     <th className="px-6 py-3 text-center">
                       <input
@@ -486,37 +486,37 @@ export default function Leads() {
                         className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                       />
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                       Jméno
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                       Email
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                       Telefon
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                       Firma
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                       Pozice
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-center text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                       AI Skóre
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                       Akce
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-200">
+                <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
                   {leads.map((lead) => {
                     const statusBadge = getStatusBadge(lead.status);
                     return (
-                    <tr key={lead.id} className="hover:bg-gray-50">
+                    <tr key={lead.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap text-center">
                         <input
                           type="checkbox"
@@ -526,25 +526,25 @@ export default function Leads() {
                         />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-slate-900 dark:text-white">
                           {lead.full_name}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{lead.email}</div>
+                        <div className="text-sm text-slate-600 dark:text-slate-400">{lead.email}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">
+                        <div className="text-sm text-slate-600 dark:text-slate-400">
                           {lead.phone || '-'}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
+                        <div className="text-sm text-slate-900 dark:text-white">
                           {lead.company_name || '-'}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">
+                        <div className="text-sm text-slate-600 dark:text-slate-400">
                           {lead.job_title || '-'}
                         </div>
                       </td>
@@ -618,7 +618,7 @@ export default function Leads() {
                 </h3>
                 <button
                   onClick={() => setShowMessageModal(false)}
-                  className="text-gray-500 hover:text-slate-700 dark:text-slate-300 text-2xl"
+                  className="text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 text-2xl"
                 >
                   ✕
                 </button>
@@ -629,7 +629,7 @@ export default function Leads() {
                   <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                     📧 Předmět:
                   </label>
-                  <div className="bg-gray-50 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                  <div className="bg-slate-50 dark:bg-slate-700 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
                     <p className="text-slate-800 dark:text-white">{currentMessage.subject}</p>
                   </div>
                   <button
@@ -644,7 +644,7 @@ export default function Leads() {
                   <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                     ✉️ Tělo emailu:
                   </label>
-                  <div className="bg-gray-50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                  <div className="bg-slate-50 dark:bg-slate-700 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
                     <p className="text-slate-800 dark:text-white whitespace-pre-wrap">{currentMessage.body}</p>
                   </div>
                   <button
@@ -664,7 +664,7 @@ export default function Leads() {
                   </button>
                   <button
                     onClick={() => setShowMessageModal(false)}
-                    className="flex-1 bg-gray-200 text-slate-800 dark:text-white py-3 rounded-lg hover:bg-gray-300 font-semibold"
+                    className="flex-1 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-white py-3 rounded-lg hover:bg-gray-300 font-semibold"
                   >
                     Zavřít
                   </button>
