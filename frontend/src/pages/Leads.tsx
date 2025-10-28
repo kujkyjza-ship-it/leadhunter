@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Layout from '../components/Layout';
 import api from '../services/api';
 
 interface Lead {
@@ -68,7 +69,7 @@ export default function Leads() {
       'closed_lost': { label: 'Uzavřeno - Prohráno', color: 'bg-red-100 text-red-800' }
     };
 
-    const config = statusConfig[status] || { label: status, color: 'bg-gray-100 text-gray-800' };
+    const config = statusConfig[status] || { label: status, color: 'bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white' };
     return { label: config.label, color: config.color };
   };
 
@@ -148,7 +149,7 @@ export default function Leads() {
   };
 
   const getScoreBadge = (score?: number) => {
-    if (!score) return { label: 'N/A', color: 'bg-gray-100 text-gray-600' };
+    if (!score) return { label: 'N/A', color: 'bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400' };
 
     if (score >= 80) return { label: `${score}`, color: 'bg-green-100 text-green-800' };
     if (score >= 60) return { label: `${score}`, color: 'bg-blue-100 text-blue-800' };
@@ -226,67 +227,49 @@ export default function Leads() {
     alert('Zkopírováno do schránky!');
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    window.location.href = '/';
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-2xl text-gray-600">Načítání...</div>
-      </div>
+      <Layout>
+        <div className="flex items-center justify-center h-screen">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+        </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-8">
-            <h1 className="text-2xl font-bold text-gray-800">🎯 LeadHunter</h1>
-            <div className="flex space-x-4">
-              <a href="/dashboard" className="text-gray-600 hover:text-gray-800">
-                Dashboard
-              </a>
-              <a href="/leads" className="text-blue-600 font-semibold">
+    <Layout>
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold text-slate-800 dark:text-white mb-2">
                 Leady
-              </a>
+              </h1>
+              <p className="text-slate-600 dark:text-slate-400">
+                Správa vašich obchodních příležitostí
+              </p>
             </div>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-          >
-            Odhlásit
-          </button>
-        </div>
-      </nav>
-
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl font-bold text-gray-800">
-            📊 Vaše Leady
-          </h2>
-          <div className="flex gap-3">
-            <button
-              onClick={handleRecalculateAllScores}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold transition-colors"
-            >
-              🎯 Přepočítat AI skóre
-            </button>
-            <button
-              onClick={handleExportCSV}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition-colors"
-            >
-              📥 Export CSV
-            </button>
-            <button
-              onClick={() => setShowForm(!showForm)}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition-colors"
-            >
-              {showForm ? '✕ Zrušit' : '+ Přidat Lead'}
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={handleRecalculateAllScores}
+                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors text-sm"
+              >
+                🎯 Přepočítat AI skóre
+              </button>
+              <button
+                onClick={handleExportCSV}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors text-sm"
+              >
+                📥 Export CSV
+              </button>
+              <button
+                onClick={() => setShowForm(!showForm)}
+                className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+              >
+                {showForm ? '✕ Zrušit' : '+ Přidat Lead'}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -329,10 +312,10 @@ export default function Leads() {
           </div>
         )}
 
-        <div className="bg-white rounded-xl shadow-md p-4 mb-6">
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-md p-4 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 Vyhledávání
               </label>
               <input
@@ -340,17 +323,17 @@ export default function Leads() {
                 placeholder="Hledat podle jména, emailu nebo firmy..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 Status
               </label>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               >
                 <option value="">Všechny statusy</option>
                 <option value="new">Nový</option>
@@ -363,7 +346,7 @@ export default function Leads() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 Řazení
               </label>
               <select
@@ -373,7 +356,7 @@ export default function Leads() {
                   setSortBy(field);
                   setSortOrder(order);
                 }}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               >
                 <option value="created_at-desc">Nejnovější</option>
                 <option value="created_at-asc">Nejstarší</option>
@@ -388,80 +371,80 @@ export default function Leads() {
         </div>
 
         {showForm && (
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 mb-6">
             <h3 className="text-xl font-bold mb-4">Nový Lead</h3>
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   Celé jméno *
                 </label>
                 <input
                   type="text"
                   value={formData.full_name}
                   onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   Email *
                 </label>
                 <input
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   Telefon
                 </label>
                 <input
                   type="text"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   Firma
                 </label>
                 <input
                   type="text"
                   value={formData.company_name}
                   onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   Pracovní pozice
                 </label>
                 <input
                   type="text"
                   value={formData.job_title}
                   onChange={(e) => setFormData({ ...formData, job_title: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   Poznámky
                 </label>
                 <input
                   type="text"
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                 />
               </div>
 
@@ -477,7 +460,7 @@ export default function Leads() {
           </div>
         )}
 
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg overflow-hidden">
           {leads.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-500 text-lg mb-4">
@@ -529,7 +512,7 @@ export default function Leads() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-200">
                   {leads.map((lead) => {
                     const statusBadge = getStatusBadge(lead.status);
                     return (
@@ -628,15 +611,15 @@ export default function Leads() {
 
       {showMessageModal && currentMessage && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-2xl font-bold text-gray-800">
+                <h3 className="text-2xl font-bold text-slate-800 dark:text-white">
                   🤖 AI Vygenerovaná Zpráva
                 </h3>
                 <button
                   onClick={() => setShowMessageModal(false)}
-                  className="text-gray-500 hover:text-gray-700 text-2xl"
+                  className="text-gray-500 hover:text-slate-700 dark:text-slate-300 text-2xl"
                 >
                   ✕
                 </button>
@@ -644,11 +627,11 @@ export default function Leads() {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                     📧 Předmět:
                   </label>
-                  <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                    <p className="text-gray-800">{currentMessage.subject}</p>
+                  <div className="bg-gray-50 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <p className="text-slate-800 dark:text-white">{currentMessage.subject}</p>
                   </div>
                   <button
                     onClick={() => copyToClipboard(currentMessage.subject)}
@@ -659,11 +642,11 @@ export default function Leads() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                     ✉️ Tělo emailu:
                   </label>
-                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                    <p className="text-gray-800 whitespace-pre-wrap">{currentMessage.body}</p>
+                  <div className="bg-gray-50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <p className="text-slate-800 dark:text-white whitespace-pre-wrap">{currentMessage.body}</p>
                   </div>
                   <button
                     onClick={() => copyToClipboard(currentMessage.body)}
@@ -682,7 +665,7 @@ export default function Leads() {
                   </button>
                   <button
                     onClick={() => setShowMessageModal(false)}
-                    className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg hover:bg-gray-300 font-semibold"
+                    className="flex-1 bg-gray-200 text-slate-800 dark:text-white py-3 rounded-lg hover:bg-gray-300 font-semibold"
                   >
                     Zavřít
                   </button>
@@ -692,6 +675,6 @@ export default function Leads() {
           </div>
         </div>
       )}
-    </div>
+    </Layout>
   );
 }
