@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import emailjs from '@emailjs/browser';
+import { Analytics } from '@vercel/analytics/react';
 import { 
   Phone, 
   Database, 
@@ -1228,6 +1229,9 @@ function App() {
       >
         <ArrowRight className="w-5 h-5 rotate-[-90deg]" />
       </button>
+
+      {/* Vercel Analytics */}
+      <Analytics />
     </div>
   );
 }
